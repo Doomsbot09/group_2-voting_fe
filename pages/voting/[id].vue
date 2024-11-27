@@ -1,9 +1,108 @@
-<script setup lang="ts"></script>
-
 <template>
-  <div>
-    Page: voting/[id]
+  <div class="container">
+    <div class="container_left">
+      <List />
+    </div>
+    <div class="container_right">
+      <div class="poll_card">
+          <div class="poll_card_content">
+            <h1 class="poll_card_title">Summer Outing 2024</h1>
+          </div>
+          <VoterItems/>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+  const route = useRouter()
+  const createPoll = () => {
+    route.push({ path: '/voting/create' })
+  }
+</script>
+
+<style lang="postcss" scoped>
+  .container {
+    @apply 
+      h-full 
+      flex;
+
+      &_left {
+        @apply 
+          h-full
+          w-1/2;
+
+          .card {
+            @apply 
+              bg-white 
+              p-8 
+              rounded-lg 
+              shadow-lg 
+              text-center 
+              max-w-sm 
+              w-full;
+      
+            &_title {
+              @apply 
+                text-2xl 
+                font-bold 
+                text-blue-700 
+                mb-4;
+            }
+      
+            &_action {
+              @apply 
+                w-full 
+                bg-blue-600 
+                text-white 
+                py-2 
+                px-4 
+                rounded-md 
+                hover:bg-blue-700 
+                transition;
+            }
+          }
+      }
+
+      &_right {
+        @apply 
+          h-full
+          w-1/2
+          bg-gray-50
+          flex
+          items-center
+          justify-center;
+
+        .poll_card {
+          min-width: 50%;
+          min-height: 10%;
+
+          @apply
+            relative 
+            p-2
+            bg-gradient-to-r 
+            from-blue-500 
+            to-purple-500 
+            rounded-lg;
+
+          &_content {
+            @apply
+              flex
+              justify-center
+              items-center
+              bg-white 
+              p-6 
+              mb-2
+              rounded-lg;
+          }
+
+          &_title {
+            @apply 
+              text-2xl 
+              font-bold 
+              text-blue-700
+          }
+        }
+      }
+  }
+</style>

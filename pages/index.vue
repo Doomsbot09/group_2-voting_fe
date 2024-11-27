@@ -12,25 +12,48 @@
 </template>
 
 <script setup lang="ts">
+  const route = useRouter()
   const createPoll = () => {
-    // Handle poll creation logic
-    alert("Poll creation triggered!");
+    route.push({ path: '/voting/create' })
   }
 </script>
 
 <style lang="postcss" scoped>
   .container {
-    @apply h-full flex items-center justify-center;
+    @apply 
+      h-full 
+      flex 
+      items-center 
+      justify-center;
 
     .card {
-      @apply bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full;
+      @apply 
+        bg-white 
+        p-8 
+        rounded-lg 
+        shadow-lg 
+        text-center 
+        max-w-sm 
+        w-full;
 
       &_title {
-        @apply text-2xl font-bold text-blue-700 mb-4;
+        @apply 
+          text-2xl 
+          font-bold 
+          text-blue-700 
+          mb-4;
       }
 
       &_action {
-        @apply w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition;
+        @apply 
+          w-full 
+          bg-blue-600 
+          text-white 
+          py-2 
+          px-4 
+          rounded-md 
+          hover:bg-blue-700 
+          transition;
       }
     }
   }
