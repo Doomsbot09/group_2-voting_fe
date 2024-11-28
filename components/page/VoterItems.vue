@@ -1,17 +1,33 @@
 <template>
-  <div class="container">
+  <div 
+    class="container" 
+    v-for="(item, index) in props.options"
+    @click="handleVote(item.id)">
     <div class="container_left">
-      <label class="font-bold">Nov 5-26</label>
-      <span class="text-xs">Voted: 78%</span>
+      <label class="font-bold">{{ item.option }}</label>
+      <span class="text-xs">Voted: 0%</span>
     </div>
     <div class="container_right">
       <Icon name="mdi:like"/>
-      6
+      {{ item.votes }}
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  const emit = defineEmits(['selected'])
+  const props = defineProps({
+    options: {
+      type: Array,
+      required: true
+    }
+  })
+
+  const handleVote = (id: number) => {
+    console.log("handleVote", id)
+    emit('selected', id)
+  }
+</script>
 <style lang="postcss" scoped>
 .container {
   @apply 
@@ -20,13 +36,14 @@
     text-white 
     py-2 
     px-4 
-    mb-2
+    mt-2
     rounded-md 
     hover:bg-blue-700 
     transition
     flex
     justify-between
-    items-center;
+    items-center
+    cursor-pointer;
 
   &_left {
     @apply

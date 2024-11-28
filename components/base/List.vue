@@ -5,7 +5,11 @@
         <h2 class="list_header_title">
           10 People Joined The Poll 
         </h2>
-        <Icon name="mdi:content-copy" size="1.5rem" />
+        <Icon 
+          class="cursor-pointer" 
+          name="mdi:content-copy" 
+          size="1.5rem"
+          @click="handleCopyLink" />
       </div>
       <div class="list_body">
         <ul class="list_body_items">
@@ -22,24 +26,32 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      items: [
-        { name: "Dominic", voted: true },
-        { name: "John", voted: false },
-        { name: "Cj", voted: true },
-        { name: "Marven", voted: false },
-        { name: "Christle", voted: true },
-        { name: "Johnny", voted: true },
-        { name: "Angel", voted: true },
-        { name: "Krysten", voted: true },
-        { name: "Hoper", voted: true },
-      ],
-    };
-  },
-};
+<script setup lang="ts">
+  const { $toast } = useNuxtApp()
+  const route = useRoute()
+  const config = useRuntimeConfig()
+
+  const items = [
+    { name: "Dominic", voted: true },
+    { name: "John", voted: false },
+    { name: "Cj", voted: true },
+    { name: "Marven", voted: false },
+    { name: "Christle", voted: true },
+    { name: "Johnny", voted: true },
+    { name: "Angel", voted: true },
+    { name: "Krysten", voted: true },
+    { name: "Hoper", voted: true },
+  ]
+  const handleCopyLink = async () => {
+    try {
+      const currentRoute = route.fullPath
+      await navigator.clipboard.writeText(`${config.public.host}:${config.public.port}${currentRoute}`)      
+      $toast.addToast('Successfully copied to clipboard!', 'success')
+    } catch (err) {
+      $toast.addToast('Failed to copy link!', 'error')
+      console.error(err)
+    }
+  }
 </script>
 
 <style lang="postcss" scoped>
@@ -100,5 +112,6 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #94a3b8; /* Darker gray on hover */
+  cursor: pointer;
 }
 </style>

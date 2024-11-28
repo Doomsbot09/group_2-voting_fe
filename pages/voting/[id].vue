@@ -6,18 +6,58 @@
     <div class="container_right">
       <div class="poll_card">
           <div class="poll_card_content">
-            <h1 class="poll_card_title">Summer Outing 2024</h1>
+            <h1 class="poll_card_title">
+              {{ polls.title || `No Name Found` }}
+            </h1>
           </div>
-          <VoterItems/>
+          <VoterItems 
+            :options="polls.options" 
+            @selected="handleVote" />
       </div>
     </div>
   </div>
+  <Dialog
+    :isVisible="showDialog"
+    title="Hi Guest!"
+    @confirm="handleConfirm">
+    <input type="text" placeholder="Name here..." v-model="userName" />
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-  const route = useRouter()
-  const createPoll = () => {
-    route.push({ path: '/voting/create' })
+  const route = useRoute()
+  const useStore = useVotingStore()
+  
+  const polls = useStore.poll
+  const guestName = useStore.guestName
+
+  const showDialog = ref(false)
+  const userName = ref("")
+
+  onMounted(() => {
+    // Check if guest has already name
+    if (!guestName) {
+      openDialog()
+    }
+  })
+
+  const handleVote = async (id: number) => {
+    console.log("ID handle Vote", id)
+    console.log("id is", route.params.id)
+  }
+
+  const openDialog = () => {
+    showDialog.value = true
+  }
+
+  const closeDialog = () => {
+    showDialog.value = false
+  }
+
+  const handleConfirm = () => {
+    // Set guest name on store
+    useStore.guestName = userName.value
+    closeDialog()
   }
 </script>
 
@@ -92,7 +132,6 @@
               items-center
               bg-white 
               p-6 
-              mb-2
               rounded-lg;
           }
 

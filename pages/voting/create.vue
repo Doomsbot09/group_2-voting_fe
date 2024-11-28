@@ -62,6 +62,7 @@
     options: string[];
   }
 
+  const useStore = useVotingStore()
   const route = useRouter()
 
   const form = ref<PollForm>({
@@ -79,8 +80,9 @@
     }
   };
 
-  const submitForm = () => {
-    console.log('Form submitted:', form.value);
+  const submitForm = async () => {
+    console.log('Form submitted:', form.value)
+    await useStore.createPoll(form.value)
     route.push({ path: `/voting/54321` })
   };
 </script>
