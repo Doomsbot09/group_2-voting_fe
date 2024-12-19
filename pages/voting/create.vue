@@ -10,6 +10,7 @@
             type="text"
             id="title"
             v-model="form.title"
+            :required="true"
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
             placeholder="Enter poll title"
           />
@@ -23,6 +24,7 @@
               type="text"
               v-model="form.options[index]"
               :placeholder="`Option ${index + 1}`"
+              :required="true"
               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
             />
             <button
@@ -57,13 +59,17 @@
 </template>
 
 <script setup lang="ts">
+  import { v4 as uuidv4 } from 'uuid';
+
   interface PollForm {
     title: string;
     options: string[];
   }
 
+  const { $toast } = useNuxtApp()
   const useStore = useVotingStore()
   const route = useRouter()
+  const channel_id = uuidv4().slice(0, 5)
 
   const form = ref<PollForm>({
     title: '',
@@ -81,9 +87,12 @@
   };
 
   const submitForm = async () => {
-    console.log('Form submitted:', form.value)
-    await useStore.createPoll(form.value)
-    route.push({ path: `/voting/54321` })
+    const { data, error, pending } = await useStore.createPoll(form.value, channel_id)
+    if (!error.value) {
+      $toast.addToast(`${data.value.message}`, 'success')
+      useStore.channel_id = channel_id
+      route.push({ path: `/voting` })
+    }
   };
 </script>
 

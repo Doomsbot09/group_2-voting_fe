@@ -13,9 +13,17 @@
 
 <script setup lang="ts">
   const route = useRouter()
-  const createPoll = () => {
+  const useStore = useVotingStore()
+
+  const createPoll = async () => {
     route.push({ path: '/voting/create' })
   }
+
+  onMounted(() => {
+    // Clear State
+    useStore.resetState()
+  })
+
 </script>
 
 <style lang="postcss" scoped>
@@ -58,3 +66,4 @@
     }
   }
 </style>
+

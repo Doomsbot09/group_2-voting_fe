@@ -1,63 +1,150 @@
 <template>
   <div class="container">
     <div class="container_left">
-      <List />
+      <List :options="useStore.users" />
     </div>
     <div class="container_right">
       <div class="poll_card">
           <div class="poll_card_content">
             <h1 class="poll_card_title">
-              {{ polls.title || `No Name Found` }}
+              {{ poll.Title || `No Name Found` }}
             </h1>
           </div>
           <VoterItems 
-            :options="polls.options" 
-            @selected="handleVote" />
+            :options="poll.Options"
+            :users="users"
+            @selected="handleSelectVote" />
       </div>
     </div>
   </div>
-  <Dialog
-    :isVisible="showDialog"
-    title="Hi Guest!"
-    @confirm="handleConfirm">
-    <input type="text" placeholder="Name here..." v-model="userName" />
-  </Dialog>
 </template>
 
 <script setup lang="ts">
+  import { useNats } from "~/composables/nats";
+  import { storeToRefs } from "pinia";
+
+  const { connectToNats, publish, natsClient } = useNats()
+
   const route = useRoute()
+  const router = useRouter()
   const useStore = useVotingStore()
   
-  const polls = useStore.poll
-  const guestName = useStore.guestName
+  const channel_id: string | string[] = route.params.id
+  const { poll, users } = storeToRefs(useStore)
 
-  const showDialog = ref(false)
-  const userName = ref("")
+  onMounted(async () => {
 
-  onMounted(() => {
-    // Check if guest has already name
-    if (!guestName) {
-      openDialog()
+    // Init Connection for NATS
+    await connectToNats()
+    await stream()
+
+    // Init API's
+    await handlePoll()
+    await handleUsers()
+
+    // Check if has name
+    if (useStore.guest.name === "") {
+      useStore.channel_id = channel_id
+      router.push({ path: `/voting` })
     }
+    
   })
 
-  const handleVote = async (id: number) => {
-    console.log("ID handle Vote", id)
-    console.log("id is", route.params.id)
+  const stream = () => {
+    if (natsClient.value) {
+      try {
+          const sub = natsClient.value.subscribe(`${channel_id}`);
+          (async () => {
+              for await (const msg of sub) {
+                  const received = new TextDecoder().decode(msg.data)
+                  const { action, channel } = JSON.parse(received)
+
+                  console.log("Received")
+                  console.log("Received", action)
+                  switch (action) {
+                    case "vote":
+                      if (channel === channel_id) {
+                        await handlePoll() // For real-time checking updates on poll
+                        await handleUsers() // For real-time checking if voted or not
+                      }
+                    break;
+                    case "join":
+                      if (channel === channel_id) {
+                        await handleUsers()
+                      }
+                    break;
+                    default: return false;
+                  }
+              }
+          })()
+      } catch (error: any) {
+          console.error(`NATS Server Error On Subscribe: `, error)
+      }
+    }
   }
 
-  const openDialog = () => {
-    showDialog.value = true
+  const handleSelectVote = async (id: number) => {
+    const message = {
+      action: "vote",
+      channel: channel_id,
+      from: useStore.guest.name,
+      voted: id
+    }
+    const payload = {
+        id: useStore.guest.id,
+        channel_id: channel_id,
+        poll_id: id
+    }
+
+    const { data, error } = await useStore.updateUserVote(payload)
+
+    if (!error.value) {
+      const user_details = data.value.data
+      
+      await handleVoting(id, user_details)
+      await publish(`${channel_id}`, JSON.stringify(message))
+    }
   }
 
-  const closeDialog = () => {
-    showDialog.value = false
+  const handleVoting = async (id: number, user_details: any) => {
+    const has_voted = user_details["Voted"]
+    const last_voted_id = useStore.guest.voted_poll_id
+
+    if (has_voted && (last_voted_id === 0)) {
+      // New Vote
+      await useStore.increment(id)
+      useStore.guest.voted_poll_id = id
+    } else if (has_voted && (last_voted_id !== id)) {
+      // Changed Vote
+      await useStore.decrement(last_voted_id)
+      await useStore.increment(id)
+      useStore.guest.voted_poll_id = id
+    } else {
+      // UnVote
+      await useStore.decrement(id)
+      useStore.guest.voted_poll_id = 0
+    }
+    
+    const { data, error, pending } = await useStore.updatePollVote(channel_id)
+
+    if (!error.value) {
+      // useStore.guest.voted_poll_id = id
+    }
   }
 
-  const handleConfirm = () => {
-    // Set guest name on store
-    useStore.guestName = userName.value
-    closeDialog()
+  const handlePoll = async () => {
+    const { data, error, pending } = await useStore.getPoll(channel_id)
+  
+    if (!error.value) {
+      useStore.poll = data.value
+    }
+  }
+
+  const handleUsers = async () => {
+    const { data, error, pending } = await useStore.getUsers(channel_id)
+    if (!error.value) {
+      useStore.users = data.value
+    }
   }
 </script>
 

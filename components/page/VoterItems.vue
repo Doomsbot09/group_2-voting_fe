@@ -4,8 +4,8 @@
     v-for="(item, index) in props.options"
     @click="handleVote(item.id)">
     <div class="container_left">
-      <label class="font-bold">{{ item.option }}</label>
-      <span class="text-xs">Voted: 0%</span>
+      <label class="font-bold">{{ item.poll_name }}</label>
+      <span class="text-xs">Voted: {{ votePercentage(item.votes) }}%</span>
     </div>
     <div class="container_right">
       <Icon name="mdi:like"/>
@@ -15,17 +15,36 @@
 </template>
 
 <script setup lang="ts">
+  interface Poll {
+    id: number,
+    poll_name: string,
+    votes: number
+  }
+
+  interface User {
+    Name: string,
+    Voted: boolean
+  }
+
   const emit = defineEmits(['selected'])
   const props = defineProps({
     options: {
-      type: Array,
+      type: Array<Poll>,
+      required: true
+    },
+    users: {
+      type: Array<User>,
       required: true
     }
   })
 
   const handleVote = (id: number) => {
-    console.log("handleVote", id)
     emit('selected', id)
+  }
+
+  const votePercentage = (votes: number) => {
+    const result = (votes / (props.users.length) * 100).toFixed(1)
+    return result
   }
 </script>
 <style lang="postcss" scoped>

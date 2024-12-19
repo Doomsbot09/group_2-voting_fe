@@ -3,7 +3,7 @@
     <div class="list">
       <div class="list_header">
         <h2 class="list_header_title">
-          10 People Joined The Poll 
+          {{ totalUsers() }} People Joined The Poll
         </h2>
         <Icon 
           class="cursor-pointer" 
@@ -14,11 +14,11 @@
       <div class="list_body">
         <ul class="list_body_items">
           <li
-            v-for="(item, index) in items"
+            v-for="(item, index) in props.options"
             :key="index"
             class="p-4 hover:bg-gray-50 transition">
-            <p class="font-medium text-gray-800">{{ item.name }}</p>
-            <p class="text-sm text-gray-500">Voted: {{ item.voted }}</p>
+            <p class="font-medium text-gray-800">{{ item?.Name }}</p>
+            <p class="text-sm text-gray-500">Voted: {{ item?.Voted || false }}</p>
           </li>
         </ul>
       </div>
@@ -27,21 +27,22 @@
 </template>
 
 <script setup lang="ts">
+  interface User {
+    Name: string,
+    Voted: boolean
+  }
+  
   const { $toast } = useNuxtApp()
   const route = useRoute()
   const config = useRuntimeConfig()
+  
+  const props = defineProps({
+    options: {
+      type: Array<User>,
+      required: true
+    }
+  })
 
-  const items = [
-    { name: "Dominic", voted: true },
-    { name: "John", voted: false },
-    { name: "Cj", voted: true },
-    { name: "Marven", voted: false },
-    { name: "Christle", voted: true },
-    { name: "Johnny", voted: true },
-    { name: "Angel", voted: true },
-    { name: "Krysten", voted: true },
-    { name: "Hoper", voted: true },
-  ]
   const handleCopyLink = async () => {
     try {
       const currentRoute = route.fullPath
@@ -51,6 +52,11 @@
       $toast.addToast('Failed to copy link!', 'error')
       console.error(err)
     }
+  }
+
+  const totalUsers = () => {
+    const total: number = props.options.length
+    return total
   }
 </script>
 
