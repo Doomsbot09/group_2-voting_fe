@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    container_name: voting-app-fe
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_HOST
+      - APP_PORT
+      - API_URL
+      - NATS_URL

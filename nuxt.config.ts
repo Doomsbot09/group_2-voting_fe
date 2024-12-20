@@ -32,7 +32,8 @@ export default defineNuxtConfig({
     public: {
       host: process.env.APP_HOST,
       port: process.env.APP_PORT,
-      api_base_url:  process.env.API_URL
+      api_base_url:  process.env.API_URL,
+      nats_server_url: process.env.NATS_URL 
     }
   }
 })

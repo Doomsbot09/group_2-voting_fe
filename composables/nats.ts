@@ -2,13 +2,14 @@ import { connect, type NatsConnection } from 'nats.ws';
 
 
 export function useNats() {
+  const config = useRuntimeConfig() 
   const natsClient = ref<NatsConnection>();
 
     const connectToNats = async () => {
         if (!natsClient.value) {
             try {
                 console.log("Connecting To NATS...")
-                natsClient.value = await connect({ servers: "ws://localhost:9222" });
+                natsClient.value = await connect({ servers: config.public.nats_server_url });
                 console.log("NATS Is Connected")
             } catch (error: any) {
                 console.error(`NATS Server Error On Connect: `, error)
