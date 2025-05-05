@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    image: szeing-poc
     container_name: voting-app-fe
     ports:
       - "3000:3000"
