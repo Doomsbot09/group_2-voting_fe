@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="card">
-      <h1 class="card_title">Can't Decide Yet?</h1>
+      <h1 class="card_title">Can't Decide Yet? v3.0.0</h1>
       <button 
         class="card_action"
         @click="createPoll">
